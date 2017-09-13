@@ -1,3 +1,6 @@
+# h5_cPlusPlus_test.py -- explore the organization of file train.h5 to assist C++ project in loading data
+# from Two Sigma Financial Modeling Challenge on Kaggle
+
 import pandas as pd
 import h5py
 h5py.run_tests()
