@@ -83,26 +83,84 @@ TwoSigmaFinModTools::TwoSigmaFinModTools(bool true_or_false = false, int n = 11)
         cout << "Data size is " << size << endl;
     }
 
-       /*
-       * Get dataspace of the dataset.
-       */
-       DataSpace dataspace_axis0 = dataset_axis0.getSpace();
-       /*
-        * Get the number of dimensions in the dataspace.
-        */
-       int rank = dataspace_axis0.getSimpleExtentNdims();
-       /*
-       * Get the dimension size of each dimension in the dataspace and
-       * display them.
-       */
-      hsize_t dims_out[2];
-      int ndims = dataspace_axis0.getSimpleExtentDims( dims_out, NULL);
-      cout << "ndims" << ndims << endl;
-      cout << "rank " << rank << ", dimensions " <<
-          (unsigned long)(dims_out[0]) << " x " <<
-          (unsigned long)(dims_out[1]) << endl;
+    /*
+    * Get dataspace of the dataset.
+    */
+    DataSpace dataspace_axis0 = dataset_axis0.getSpace();
+    /*
+     * Get the number of dimensions in the dataspace.
+     */
+    int rank = dataspace_axis0.getSimpleExtentNdims();
+    /*
+    * Get the dimension size of each dimension in the dataspace and
+    * display them.
+    */
+    hsize_t dims_out[2];
+    int ndims = dataspace_axis0.getSimpleExtentDims( dims_out, NULL);
+    cout << "ndims" << ndims << endl;
+    cout << "rank " << rank << ", dimensions " <<
+        (unsigned long)(dims_out[0]) << " x " <<
+        (unsigned long)(dims_out[1]) << endl;
+    
+    // hyperslab dimensions
+    const int NX_SUB = 2;
+    const int NY_SUB = 2;
+    // const int NX = 1710756;        // output buffer dimensions
+    const int NX = 18000; 
+    const int NY = 111;
+    const int RANK_OUT = 2;
+    /* 
+     * Define hyperslab in dataset. Implicitly with strike and 
+     * block NULL.      
+     */
+    hsize_t offset[2];
+    hsize_t count[2];
+    offset[0] = 1;
+    offset[0] = 2;
+    count[0] = NX_SUB;
+    count[1] = NY_SUB;
+    dataspace_axis0.selectHyperslab( H5S_SELECT_SET, count, offset );
+    /* 
+     * Define memory dataspace.
+     */
+    hsize_t dimsm[2];
+    dimsm[0] = NX;
+    dimsm[1] = NY;
+    DataSpace memspace( RANK_OUT, dimsm );
 
+    /* 
+     * Define memory hyperslab.
+     */
+    hsize_t offset_out[2];
+    hsize_t count_out[2];
+    offset_out[0] = 2;
+    offset_out[1] = 0;
+    count_out[0] = NX_SUB;
+    count_out[1] = NY_SUB;
+    memspace.selectHyperslab( H5S_SELECT_SET, count_out, offset_out );
 
+    /* 
+     * Read data from file's hyperslab into the hyperslab of memory and display data.
+     */
+    int i, j;
+    int data_out[NX][NY];  /* Output buffer */
+    for (i = 0; i < NX; i++)
+    {
+        for (j = 0; j < NY; j++)
+        {
+            data_out[i][j] = 0;
+        }
+    }
+        
+    // dataset_axis0.read( data_out, PredType::NATIVE_LDOUBLE, memspace, dataspace_axis0);
+    // for (i = 0; i < NX; i++)
+    // {
+    //     for (j = 0; j < NY; j++)
+    //     {
+    //         cout << data_out[i][j] << " ";
+    //     }
+    //     cout << endl;
+    // }
 }
 
 // destructor
