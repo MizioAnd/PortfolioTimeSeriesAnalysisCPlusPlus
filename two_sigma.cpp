@@ -39,7 +39,10 @@ TwoSigmaFinModTools::TwoSigmaFinModTools(bool true_or_false = false, int n = 11)
     DataSet dataset_block0_values = file.openDataSet( dataset_block0_values_name );
     DataSet dataset_block1_items = file.openDataSet( dataset_block1_items_name );
     DataSet dataset_block1_values = file.openDataSet( dataset_block1_values_name );
-    
+
+    // Debugging dataset
+    DataSet dataset = file.openDataSet( dataset_block0_items_name );
+
     // hid_t file_id;
     // file_id = file.getLocId();
     // hid_t dataset_my;
@@ -51,7 +54,8 @@ TwoSigmaFinModTools::TwoSigmaFinModTools(bool true_or_false = false, int n = 11)
     /*
     * Get the class of the datatype that is used by the dataset.
     */
-    H5T_class_t type_class = dataset_axis0.getTypeClass();
+    // H5T_class_t type_class = dataset_axis0.getTypeClass();
+    H5T_class_t type_class = dataset.getTypeClass();
     cout << type_class  << endl;
     // std::ostringstream ss;
     // ss << type_class;
@@ -66,7 +70,8 @@ TwoSigmaFinModTools::TwoSigmaFinModTools(bool true_or_false = false, int n = 11)
         /*
         * Get the string datatype
         */
-        StrType strtype = dataset_axis0.getStrType();
+        // StrType strtype = dataset_axis0.getStrType();
+        StrType strtype = dataset.getStrType();
         // IntType intype = dataset.getIntType();
         /*
         * Get order of datatype and print message if it's a little endian.
@@ -86,40 +91,47 @@ TwoSigmaFinModTools::TwoSigmaFinModTools(bool true_or_false = false, int n = 11)
     /*
     * Get dataspace of the dataset.
     */
-    DataSpace dataspace_axis0 = dataset_axis0.getSpace();
+    // DataSpace dataspace_axis0 = dataset_axis0.getSpace();
+    // DataSpace dataspace_block0_items = dataset_block0_items.getSpace();
+    DataSpace dataspace = dataset.getSpace();
     /*
      * Get the number of dimensions in the dataspace.
      */
-    int rank = dataspace_axis0.getSimpleExtentNdims();
+    // int rank = dataspace_axis0.getSimpleExtentNdims();
+    int rank = dataspace.getSimpleExtentNdims();
     /*
     * Get the dimension size of each dimension in the dataspace and
     * display them.
     */
     hsize_t dims_out[2];
-    int ndims = dataspace_axis0.getSimpleExtentDims( dims_out, NULL);
-    cout << "ndims" << ndims << endl;
+    // int ndims = dataspace_axis0.getSimpleExtentDims( dims_out, NULL );
+    int ndims = dataspace.getSimpleExtentDims( dims_out, NULL );
+    cout << "ndims " << ndims << endl;
     cout << "rank " << rank << ", dimensions " <<
         (unsigned long)(dims_out[0]) << " x " <<
         (unsigned long)(dims_out[1]) << endl;
     
     // hyperslab dimensions
     const int NX_SUB = 2;
-    const int NY_SUB = 2;
+    const int NY_SUB = 1;
     // const int NX = 1710756;        // output buffer dimensions
-    const int NX = 18000; 
-    const int NY = 111;
-    const int RANK_OUT = 2;
+    const int NX = 2; 
+    const int NY = 1;
+    // const int NX = 18000; 
+    // const int NY = 111;
+    const int RANK_OUT = 1;
     /* 
      * Define hyperslab in dataset. Implicitly with strike and 
      * block NULL.      
      */
     hsize_t offset[2];
     hsize_t count[2];
-    offset[0] = 1;
-    offset[0] = 2;
+    offset[0] = 0;
+    offset[1] = 0;
     count[0] = NX_SUB;
     count[1] = NY_SUB;
-    dataspace_axis0.selectHyperslab( H5S_SELECT_SET, count, offset );
+    // dataspace_axis0.selectHyperslab( H5S_SELECT_SET, count, offset );
+    dataspace.selectHyperslab( H5S_SELECT_SET, count, offset );
     /* 
      * Define memory dataspace.
      */
@@ -133,7 +145,7 @@ TwoSigmaFinModTools::TwoSigmaFinModTools(bool true_or_false = false, int n = 11)
      */
     hsize_t offset_out[2];
     hsize_t count_out[2];
-    offset_out[0] = 2;
+    offset_out[0] = 0;
     offset_out[1] = 0;
     count_out[0] = NX_SUB;
     count_out[1] = NY_SUB;
@@ -152,15 +164,17 @@ TwoSigmaFinModTools::TwoSigmaFinModTools(bool true_or_false = false, int n = 11)
         }
     }
         
-    // dataset_axis0.read( data_out, PredType::NATIVE_LDOUBLE, memspace, dataspace_axis0);
-    // for (i = 0; i < NX; i++)
-    // {
-    //     for (j = 0; j < NY; j++)
-    //     {
-    //         cout << data_out[i][j] << " ";
-    //     }
-    //     cout << endl;
-    // }
+    // dataset_axis0.read( data_out, PredType::NATIVE_LDOUBLE, memspace, dataspace_axis0 );
+    // dataset_axis0.read( data_out, PredType::NATIVE_FLOAT, memspace, dataspace_axis0 );
+    dataset_block0_items.read( data_out, PredType::NATIVE_CHAR, memspace, dataspace );
+    for (i = 0; i < NX; i++)
+    {
+        for (j = 0; j < NY; j++)
+        {
+            cout << data_out[i][j] << " ";
+        }
+        cout << endl;
+    }
 }
 
 // destructor
