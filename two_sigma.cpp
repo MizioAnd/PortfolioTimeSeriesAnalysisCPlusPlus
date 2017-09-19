@@ -117,10 +117,10 @@ TwoSigmaFinModTools::TwoSigmaFinModTools(bool true_or_false = false, int n = 11)
     
     // hyperslab dimensions
     const int NX_SUB = 2;
-    const int NY_SUB = 1;
+    const int NY_SUB = 2;
     // const int NX = 1710756;        // output buffer dimensions
-    const int NX = 2; 
-    const int NY = 1;
+    const int NX = 7; 
+    const int NY = 7;
     // const int NX = 18000; 
     // const int NY = 111;
     const int RANK_OUT = 2;
@@ -170,7 +170,8 @@ TwoSigmaFinModTools::TwoSigmaFinModTools(bool true_or_false = false, int n = 11)
         
     // dataset_axis0.read( data_out, PredType::NATIVE_LDOUBLE, memspace, dataspace_axis0 );
     // dataset_axis0.read( data_out, PredType::NATIVE_FLOAT, memspace, dataspace_axis0 );
-    dataset_block0_items.read( data_out, PredType::NATIVE_CHAR, memspace, dataspace );
+    // dataset_block0_items.read( data_out, PredType::NATIVE_CHAR, memspace, dataspace );
+    dataset.read( data_out, PredType::NATIVE_INT, memspace, dataspace );
     for (i = 0; i < NX; i++)
     {
         for (j = 0; j < NY; j++)
