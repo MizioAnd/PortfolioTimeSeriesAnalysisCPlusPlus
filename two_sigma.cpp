@@ -42,8 +42,8 @@ TwoSigmaFinModTools::TwoSigmaFinModTools(bool true_or_false = false, int n = 11)
     DataSet dataset_block1_values = file.openDataSet( dataset_block1_values_name );
 
     // Debugging dataset
-    // DataSet dataset = file.openDataSet( dataset_block0_items_name );
-    DataSet dataset = file_select.openDataSet( dataset_name_select );
+    DataSet dataset = file.openDataSet( dataset_block0_items_name );
+    // DataSet dataset = file_select.openDataSet( dataset_name_select );
 
     // hid_t file_id;
     // file_id = file.getLocId();
@@ -66,8 +66,8 @@ TwoSigmaFinModTools::TwoSigmaFinModTools(bool true_or_false = false, int n = 11)
     /*
     * Get class of datatype and print message if it's a string.
     */
-    // if( type_class == H5T_STRING )
-    if( type_class == H5T_INTEGER )
+    if( type_class == H5T_STRING )
+    // if( type_class == H5T_INTEGER )
     {
         // cout << "Data set has STRING type" << endl;
         cout << "Data set has INTEGER type" << endl;
@@ -75,20 +75,20 @@ TwoSigmaFinModTools::TwoSigmaFinModTools(bool true_or_false = false, int n = 11)
         * Get the string datatype
         */
         // StrType strtype = dataset_axis0.getStrType();
-        // StrType strtype = dataset.getStrType();
-        IntType intype = dataset.getIntType();
+        StrType strtype = dataset.getStrType();
+        // IntType intype = dataset.getIntType();
         /*
         * Get order of datatype and print message if it's a little endian.
         */
         H5std_string order_string;
-        // H5T_order_t order = strtype.getOrder( order_string );
-        H5T_order_t order = intype.getOrder( order_string );
+        H5T_order_t order = strtype.getOrder( order_string );
+        // H5T_order_t order = intype.getOrder( order_string );
         cout << order_string << endl;
         /*
         * Get size of the data element stored in file and print it.
         */
-        // size_t size = strtype.getSize();
-        size_t size = intype.getSize();
+        size_t size = strtype.getSize();
+        // size_t size = intype.getSize();
         cout << "Data size is " << size << endl;
     }
 
@@ -119,11 +119,11 @@ TwoSigmaFinModTools::TwoSigmaFinModTools(bool true_or_false = false, int n = 11)
     const int NX_SUB = 2;
     const int NY_SUB = 2;
     // const int NX = 1710756;        // output buffer dimensions
-    const int NX = 7; 
+    const int NX = 2; 
     const int NY = 7;
     // const int NX = 18000; 
     // const int NY = 111;
-    const int RANK_OUT = 2;
+    const int RANK_OUT = 1;
     /* 
      * Define hyperslab in dataset. Implicitly with strike and 
      * block NULL.      
@@ -159,19 +159,23 @@ TwoSigmaFinModTools::TwoSigmaFinModTools(bool true_or_false = false, int n = 11)
      * Read data from file's hyperslab into the hyperslab of memory and display data.
      */
     int i, j;
-    int data_out[NX][NY];  /* Output buffer */
+    // int data_out[NX][NY];  /* Output buffer */
+    string data_out[NX][NY];  /* Output buffer */
     for (i = 0; i < NX; i++)
     {
         for (j = 0; j < NY; j++)
         {
-            data_out[i][j] = 0;
+            // data_out[i][j] = 0;
+            data_out[i][j] = "0";
+            // data_out[i][j] = '*';
         }
     }
         
     // dataset_axis0.read( data_out, PredType::NATIVE_LDOUBLE, memspace, dataspace_axis0 );
     // dataset_axis0.read( data_out, PredType::NATIVE_FLOAT, memspace, dataspace_axis0 );
     // dataset_block0_items.read( data_out, PredType::NATIVE_CHAR, memspace, dataspace );
-    dataset.read( data_out, PredType::NATIVE_INT, memspace, dataspace );
+    dataset.read( data_out, PredType::C_S1, memspace, dataspace );
+    // dataset.read( data_out, PredType::NATIVE_CHAR, memspace, dataspace );
     for (i = 0; i < NX; i++)
     {
         for (j = 0; j < NY; j++)
