@@ -18,8 +18,8 @@ const H5std_string dataset_block0_items_name( "/train/block0_items" );
 const H5std_string dataset_block0_values_name( "/train/block0_values" );
 const H5std_string dataset_block1_items_name( "/train/block1_items" );
 const H5std_string dataset_block1_values_name( "/train/block1_values" );
-// const H5std_string FILE_NAME( "Select.h5" );
-// const H5std_string DATASET_NAME( "Matrix in file" );
+const H5std_string file_name_select( "Select.h5" );
+const H5std_string dataset_name_select( "Matrix in file" );
 
 TwoSigmaFinModTools::TwoSigmaFinModTools(bool true_or_false = false, int n = 11)
 {
@@ -32,6 +32,7 @@ TwoSigmaFinModTools::TwoSigmaFinModTools(bool true_or_false = false, int n = 11)
     * Open the specified file and the specified dataset in the file.
     */
     // The works for opening "Matrix in file" data set
+    H5File file_select( file_name_select, H5F_ACC_RDONLY );
     H5File file( FILE_NAME, H5F_ACC_RDONLY );
     DataSet dataset_axis0 = file.openDataSet( dataset_axis0_name );
     DataSet dataset_axis1 = file.openDataSet( dataset_axis1_name );
@@ -41,7 +42,8 @@ TwoSigmaFinModTools::TwoSigmaFinModTools(bool true_or_false = false, int n = 11)
     DataSet dataset_block1_values = file.openDataSet( dataset_block1_values_name );
 
     // Debugging dataset
-    DataSet dataset = file.openDataSet( dataset_block0_items_name );
+    // DataSet dataset = file.openDataSet( dataset_block0_items_name );
+    DataSet dataset = file_select.openDataSet( dataset_name_select );
 
     // hid_t file_id;
     // file_id = file.getLocId();
@@ -64,27 +66,29 @@ TwoSigmaFinModTools::TwoSigmaFinModTools(bool true_or_false = false, int n = 11)
     /*
     * Get class of datatype and print message if it's a string.
     */
-    if( type_class == H5T_STRING )
+    // if( type_class == H5T_STRING )
+    if( type_class == H5T_INTEGER )
     {
-        cout << "Data set has STRING type" << endl;
+        // cout << "Data set has STRING type" << endl;
+        cout << "Data set has INTEGER type" << endl;
         /*
         * Get the string datatype
         */
         // StrType strtype = dataset_axis0.getStrType();
-        StrType strtype = dataset.getStrType();
-        // IntType intype = dataset.getIntType();
+        // StrType strtype = dataset.getStrType();
+        IntType intype = dataset.getIntType();
         /*
         * Get order of datatype and print message if it's a little endian.
         */
         H5std_string order_string;
-        H5T_order_t order = strtype.getOrder( order_string );
-        // H5T_order_t order = intype.getOrder( order_string );
+        // H5T_order_t order = strtype.getOrder( order_string );
+        H5T_order_t order = intype.getOrder( order_string );
         cout << order_string << endl;
         /*
         * Get size of the data element stored in file and print it.
         */
-        size_t size = strtype.getSize();
-        // size_t size = intype.getSize();
+        // size_t size = strtype.getSize();
+        size_t size = intype.getSize();
         cout << "Data size is " << size << endl;
     }
 
@@ -119,7 +123,7 @@ TwoSigmaFinModTools::TwoSigmaFinModTools(bool true_or_false = false, int n = 11)
     const int NY = 1;
     // const int NX = 18000; 
     // const int NY = 111;
-    const int RANK_OUT = 1;
+    const int RANK_OUT = 2;
     /* 
      * Define hyperslab in dataset. Implicitly with strike and 
      * block NULL.      
