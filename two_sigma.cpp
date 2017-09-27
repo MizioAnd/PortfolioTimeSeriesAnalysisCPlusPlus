@@ -32,18 +32,37 @@ TwoSigmaFinModTools::TwoSigmaFinModTools(bool true_or_false = false, int n = 11)
     * Open the specified file and the specified dataset in the file.
     */
     // The works for opening "Matrix in file" data set
-    H5File file_select( file_name_select, H5F_ACC_RDONLY );
-    H5File file( FILE_NAME, H5F_ACC_RDONLY );
-    DataSet dataset_axis0 = file.openDataSet( dataset_axis0_name );
-    DataSet dataset_axis1 = file.openDataSet( dataset_axis1_name );
-    DataSet dataset_block0_items = file.openDataSet( dataset_block0_items_name );
-    DataSet dataset_block0_values = file.openDataSet( dataset_block0_values_name );
-    DataSet dataset_block1_items = file.openDataSet( dataset_block1_items_name );
-    DataSet dataset_block1_values = file.openDataSet( dataset_block1_values_name );
+    // H5File file_select( file_name_select, H5F_ACC_RDONLY );
+    // H5File file( FILE_NAME, H5F_ACC_RDONLY );
+    // DataSet dataset_axis0 = file.openDataSet( dataset_axis0_name );
+    // DataSet dataset_axis1 = file.openDataSet( dataset_axis1_name );
+    // DataSet dataset_block0_items = file.openDataSet( dataset_block0_items_name );
+    // DataSet dataset_block0_values = file.openDataSet( dataset_block0_values_name );
+    // DataSet dataset_block1_items = file.openDataSet( dataset_block1_items_name );
+    // DataSet dataset_block1_values = file.openDataSet( dataset_block1_values_name );
+    H5File * file = new H5File ( FILE_NAME, H5F_ACC_RDONLY );
 
     // Debugging dataset
-    DataSet dataset = file.openDataSet( dataset_block0_items_name );
+    // DataSet dataset = file.openDataSet( dataset_axis0_name );
+    // DataSet dataset = file.openDataSet( dataset_block0_items_name );
+    // DataSet dataset = file.openDataSet( dataset_block0_values_name );
     // DataSet dataset = file_select.openDataSet( dataset_name_select );
+    DataSet * dataset = new DataSet (file->openDataSet( dataset_block0_items_name ));
+
+    // Read an attribute using dynamic memory allocation on heap (new)
+    H5std_string test;
+    // Group * group = new Group (file->openGroup( "/" ));
+    Group * group = new Group (file->openGroup( "/train" ));
+    // Attribute * attr = new Attribute (group->openAttribute( "PYTABLES_FORMAT_VERSION" ));
+    // Attribute * attr = new Attribute (group->openAttribute( "pandas_type" ));
+    Attribute * attr = new Attribute (group->openAttribute( "pandas_type" ));
+    DataType * type = new DataType (attr->getDataType());
+    attr->read( *type, test );
+    cout << test << endl;
+    delete attr;
+    delete type;
+    delete group;
+    delete file;
 
     // hid_t file_id;
     // file_id = file.getLocId();
@@ -56,71 +75,87 @@ TwoSigmaFinModTools::TwoSigmaFinModTools(bool true_or_false = false, int n = 11)
     /*
     * Get the class of the datatype that is used by the dataset.
     */
-    // H5T_class_t type_class = dataset_axis0.getTypeClass();
-    H5T_class_t type_class = dataset.getTypeClass();
-    cout << type_class  << endl;
-    // std::ostringstream ss;
-    // ss << type_class;
-    // cout << ss.str()  << endl;
+    H5T_class_t * type_class = new H5T_class_t (dataset->getTypeClass());
+    cout << *type_class << endl;
 
     /*
     * Get class of datatype and print message if it's a string.
     */
-    if( type_class == H5T_STRING )
-    // if( type_class == H5T_INTEGER )
+    if( *type_class == H5T_STRING )
+    // if( *type_class == H5T_INTEGER )
     {
-        // cout << "Data set has STRING type" << endl;
-        cout << "Data set has INTEGER type" << endl;
+        cout << "Data set has STRING type" << endl;
         /*
         * Get the string datatype
         */
-        // StrType strtype = dataset_axis0.getStrType();
-        StrType strtype = dataset.getStrType();
-        // IntType intype = dataset.getIntType();
+        StrType * strtype = new StrType (dataset->getStrType());
         /*
         * Get order of datatype and print message if it's a little endian.
         */
-        H5std_string order_string;
-        H5T_order_t order = strtype.getOrder( order_string );
-        // H5T_order_t order = intype.getOrder( order_string );
-        cout << order_string << endl;
+        H5std_string * order_string;
+        H5T_cset_t * set_type = new H5T_cset_t (strtype->getCset());
+        cout << *set_type << endl;
         /*
         * Get size of the data element stored in file and print it.
         */
-        size_t size = strtype.getSize();
-        // size_t size = intype.getSize();
-        cout << "Data size is " << size << endl;
+        size_t * size = new size_t (strtype->getSize());
+        cout << "Data size is " << *size << endl;
     }
+
+    if( *type_class == H5T_INTEGER )
+    {
+        cout << "Data set has INTEGER type" << endl;
+        /*
+        * Get the integer datatype
+        */
+        IntType * intype = new IntType (dataset->getIntType());
+        /*
+        * Get order of datatype and print message if it's a little endian.
+        */
+        H5std_string * order_string;
+        H5T_order_t * order = new H5T_order_t (intype->getOrder( *order_string ));
+        cout << order_string << endl;
+
+        /*
+        * Get size of the data element stored in file and print it.
+        */
+        size_t * size = new size_t (intype->getSize());
+        cout << "Data size is " << *size << endl;
+    }
+
+    delete type_class;
 
     /*
     * Get dataspace of the dataset.
     */
-    // DataSpace dataspace_axis0 = dataset_axis0.getSpace();
-    // DataSpace dataspace_block0_items = dataset_block0_items.getSpace();
-    DataSpace dataspace = dataset.getSpace();
+    DataSpace * dataspace = new DataSpace (dataset->getSpace());
     /*
      * Get the number of dimensions in the dataspace.
      */
-    // int rank = dataspace_axis0.getSimpleExtentNdims();
-    int rank = dataspace.getSimpleExtentNdims();
+    int * rank = new int (dataspace->getSimpleExtentNdims());
     /*
     * Get the dimension size of each dimension in the dataspace and
     * display them.
     */
-    hsize_t dims_out[2];
-    // int ndims = dataspace_axis0.getSimpleExtentDims( dims_out, NULL );
-    int ndims = dataspace.getSimpleExtentDims( dims_out, NULL );
-    cout << "ndims " << ndims << endl;
-    cout << "rank " << rank << ", dimensions " <<
-        (unsigned long)(dims_out[0]) << " x " <<
-        (unsigned long)(dims_out[1]) << endl;
+    // hsize_t dims_out[1];
+    hsize_t (*dims_out)[1];
+    int * ndims = new int (dataspace->getSimpleExtentDims( *dims_out, NULL));
+    cout << "ndims " << *ndims << endl;
+    cout << "rank " << *rank << ", dimensions " <<
+        (unsigned long)(dims_out[0]) << endl;
+        // (unsigned long)(dims_out[0]) << " x " <<
+        // (unsigned long)(dims_out[1]) << endl;
+    delete rank;
+    delete ndims;
+    delete dims_out;
+    
     
     // hyperslab dimensions
     const int NX_SUB = 2;
-    const int NY_SUB = 2;
+    const int NY_SUB = 1;
     // const int NX = 1710756;        // output buffer dimensions
-    const int NX = 2; 
-    const int NY = 7;
+    const int NX = 2;
+    const int NY = 1;
     // const int NX = 18000; 
     // const int NY = 111;
     const int RANK_OUT = 1;
@@ -128,62 +163,76 @@ TwoSigmaFinModTools::TwoSigmaFinModTools(bool true_or_false = false, int n = 11)
      * Define hyperslab in dataset. Implicitly with strike and 
      * block NULL.      
      */
-    hsize_t offset[2];
-    hsize_t count[2];
+    hsize_t offset[1];
+    hsize_t count[1];
     offset[0] = 0;
-    offset[1] = 0;
+    // offset[1] = 0;
     count[0] = NX_SUB;
-    count[1] = NY_SUB;
-    // dataspace_axis0.selectHyperslab( H5S_SELECT_SET, count, offset );
-    dataspace.selectHyperslab( H5S_SELECT_SET, count, offset );
+    // count[1] = NY_SUB;
+    dataspace->selectHyperslab( H5S_SELECT_SET, count , offset );
     /* 
      * Define memory dataspace.
      */
-    hsize_t dimsm[2];
+    hsize_t dimsm[1];
     dimsm[0] = NX;
-    dimsm[1] = NY;
-    DataSpace memspace( RANK_OUT, dimsm );
+    // dimsm[1] = NY;
+    DataSpace * memspace = new DataSpace ( RANK_OUT, dimsm );
 
     /* 
      * Define memory hyperslab.
      */
-    hsize_t offset_out[2];
-    hsize_t count_out[2];
+    hsize_t offset_out[1];
+    hsize_t count_out[1];
     offset_out[0] = 0;
-    offset_out[1] = 0;
+    // offset_out[1] = 0;
     count_out[0] = NX_SUB;
-    count_out[1] = NY_SUB;
-    memspace.selectHyperslab( H5S_SELECT_SET, count_out, offset_out );
+    // count_out[1] = NY_SUB;
+    memspace->selectHyperslab( H5S_SELECT_SET, count_out, offset_out );
 
     /* 
      * Read data from file's hyperslab into the hyperslab of memory and display data.
      */
     int i, j;
     // int data_out[NX][NY];  /* Output buffer */
-    string data_out[NX][NY];  /* Output buffer */
+    H5std_string * data_out = new H5std_string [NX];  /* Output buffer */
+    // int data_out[NX];  /* Output buffer */
+    // H5T_STRING data_out[NX];  /* Output buffer */
+    // PredType::C_S1 data_out[NX][NY];  /* Output buffer */
+    // for (i = 0; i < NX; i++)
+    // {
+    //     for (j = 0; j < NY; j++)
+    //     {
+    //         // data_out[i][j] = 0;
+    //         data_out[i][j] = "0";
+    //         // data_out[i][j] = '*';
+    //     }
+    // }
+
     for (i = 0; i < NX; i++)
     {
-        for (j = 0; j < NY; j++)
-        {
-            // data_out[i][j] = 0;
-            data_out[i][j] = "0";
-            // data_out[i][j] = '*';
-        }
+        data_out[i] = "0";
+        // data_out[i] = 0;
     }
         
-    // dataset_axis0.read( data_out, PredType::NATIVE_LDOUBLE, memspace, dataspace_axis0 );
-    // dataset_axis0.read( data_out, PredType::NATIVE_FLOAT, memspace, dataspace_axis0 );
-    // dataset_block0_items.read( data_out, PredType::NATIVE_CHAR, memspace, dataspace );
-    dataset.read( data_out, PredType::C_S1, memspace, dataspace );
-    // dataset.read( data_out, PredType::NATIVE_CHAR, memspace, dataspace );
+    dataset->read( data_out, PredType::C_S1, *memspace, *dataspace );
+    // dataset->read( data_out , PredType::C_S1 );
+    // for (i = 0; i < NX; i++)
+    // {
+    //     for (j = 0; j < NY; j++)
+    //     {
+    //         cout << data_out[i][j] << " ";
+    //     }
+    //     cout << endl;
+    // }
     for (i = 0; i < NX; i++)
     {
-        for (j = 0; j < NY; j++)
-        {
-            cout << data_out[i][j] << " ";
-        }
+        cout << data_out[i];
         cout << endl;
     }
+    delete dataset;
+    delete memspace;
+    delete dataspace;
+    // delete data_out;
 }
 
 // destructor
