@@ -26,7 +26,7 @@ const H5std_string dataset_name_select( "Matrix in file" );
 
 TwoSigmaFinModTools::TwoSigmaFinModTools(bool true_or_false = false, int n = 11)
 {
-   _input_file_name = "/pathToFile/train.h5";
+    _input_file_name = "/pathToFile/train.h5";
     _save_path = "/pathToDir/";
     is_portfolio_predictions = true_or_false;
     number_of_assets_in_portfolio = n;
@@ -51,7 +51,8 @@ TwoSigmaFinModTools::TwoSigmaFinModTools(bool true_or_false = false, int n = 11)
     // DataSet dataset = file.openDataSet( dataset_block0_values_name );
     // DataSet dataset = file_select.openDataSet( dataset_name_select );
     // DataSet * dataset = new DataSet (file->openDataSet( dataset_block0_items_name ));
-    DataSet * dataset = new DataSet (file->openDataSet( dataset_block0_values_name ));
+    // DataSet * dataset = new DataSet (file->openDataSet( dataset_block0_values_name ));
+    DataSet * dataset = new DataSet (file->openDataSet( dataset_block1_values_name ));
 
     // // Read an attribute using dynamic memory allocation on heap (new)
     // H5std_string test;
@@ -148,15 +149,15 @@ TwoSigmaFinModTools::TwoSigmaFinModTools(bool true_or_false = false, int n = 11)
     cout << "rank " << *rank << ", dimensions " <<
         // (unsigned long)(dims_out[0]) << endl;
         (unsigned long)(dims_out[0]) << " x " <<
-        (unsigned long)(dims_out[1]) << endl;
+        (unsigned long)(dims_out[1]) << endl << endl;
     delete rank;
     delete ndims;
     delete dims_out;
     
     
     // hyperslab dimensions
-    const int NX_SUB = 10;
-    const int NY_SUB = 2;
+    const int NX_SUB = 4;
+    const int NY_SUB = 4;
     // const int NX = 1710756;        // output buffer dimensions
     const int NX = NX_SUB;
     const int NY = NY_SUB;
@@ -207,7 +208,10 @@ TwoSigmaFinModTools::TwoSigmaFinModTools(bool true_or_false = false, int n = 11)
     // }
 
     // Define two dim array in static memory. Memory is cleared after leaving scope
-    int data_out[NX][NY];  /* Output buffer */    
+    // int data_out[NX][NY];  /* Output buffer */    
+    
+    // H5T_IEEE_F32LE is of type float
+    float data_out[NX][NY];  /* Output buffer */    
     
     // int data_out[NX];  /* Output buffer */
     // H5std_string * data_out = new H5std_string [NX];  /* Output buffer */
@@ -245,8 +249,12 @@ TwoSigmaFinModTools::TwoSigmaFinModTools(bool true_or_false = false, int n = 11)
         }
     }
 
+    // read for /train/block1_values dataset
+    dataset->read( data_out, PredType::IEEE_F32LE, *memspace, *dataspace ); 
     // dataset->read( data_out, PredType::NATIVE_INT );
-    dataset->read( data_out, PredType::NATIVE_INT, *memspace, *dataspace );
+
+    // read for /train/block0_values dataset
+    // dataset->read( data_out, PredType::NATIVE_INT, *memspace, *dataspace );
     // for (i = 0; i < NX; i++)
     // {
     //     dataset->read( data_out, PredType::NATIVE_INT, *memspace, *dataspace );
@@ -263,7 +271,7 @@ TwoSigmaFinModTools::TwoSigmaFinModTools(bool true_or_false = false, int n = 11)
             }
         cout << endl;
         }
-
+        cout << endl;
     }
     else
     {
